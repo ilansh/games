@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <unistd.h>
+//#include <unistd.h>
 
 static programManager _sharedInstance;
 

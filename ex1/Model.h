@@ -21,8 +21,15 @@ using namespace glm;
 #include <GL/gl.h>
 #endif
 
+#include <vector>
+
 class Model {
 	
+private:
+
+	//constants:
+	static const int GRID_SIZE = 128;
+
     GLuint _vao, _vbo, _ibo;
 
     // Attribute handle:
@@ -32,10 +39,20 @@ class Model {
     GLint _fillColorUV, _gpuWVP;
     
     size_t _nVertices;
-    // View port frame:
-    float _width, _height, _offsetX, _offsetY;
 
- public:
+	//model vertices
+	std::vector<glm::vec4> _vertices;
+
+
+    // View port frame:
+    float _offsetX, _offsetY;
+	int _width, _height;
+
+	
+
+	void generateGrid();
+
+public:
     Model();
     virtual ~Model();
     void init();

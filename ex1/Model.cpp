@@ -20,7 +20,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #define SHADERS_DIR "shaders/"
-
+//
 Model::Model() :
     _vao(0), _vbo(0), _ibo(0)
 {
@@ -32,7 +32,30 @@ Model::~Model()
     if (_vao != 0) glDeleteVertexArrays(1, &_vao);
     if (_vbo != 0) glDeleteBuffers(1, &_vbo);
     if (_ibo != 0) glDeleteBuffers(1, &_ibo);
-} 
+}
+
+void Model::generateGrid()
+{
+	_nVertices = GRID_SIZE * GRID_SIZE;
+	for (int i = 0; i < GRID_SIZE; i++)
+	{
+		for(int j = 0; j < GRID_SIZE; j++)
+		{
+			_vertices[i * GRID_SIZE + j] = glm::vec4(j, 0.0, i, 1.0);
+		}
+	}
+
+	std::vector<glm::vec3> indices;
+	for (int i = 1; i < GRID_SIZE; i++)
+	{
+		for(int j = 0; j < GRID_SIZE; j+=2)
+		{
+			indices[(i - 1) * GRID_SIZE + j] = glm::vec3(j, j + 1, i * GRID_SIZE);
+			indices[(i - 1) * GRID_SIZE + j] = glm::vec3(j, j + 1, i * GRID_SIZE + 1);
+		}
+	}
+	
+}
 
 void Model::init()
 {
@@ -51,10 +74,10 @@ void Model::init()
     {
         // positioning vertices
         static const GLfloat vertices[] = {
-            0.0f,  0.0f, 0.0f, 1.0f,
-            1.0f,  0.0f, 0.0f, 1.0f,
-            0.0f,  1.0f, 0.0f, 1.0f,
-            1.0f,  1.0f, 0.0f, 1.0f,
+            0.0f,  -1.0f, 0.0f, 1.0f,
+            1.0f,  -1.0f, 0.0f, 1.0f,
+            0.0f,  -1.0f, 1.0f, 1.0f,
+            1.0f,  -1.0f, 1.0f, 1.0f,
         };
         
         // connecting vertices into triangles

@@ -37,9 +37,3 @@ _ReSharper*/
 ex5/ex5.opensdf
 ex5/ex5.sdf
 ex5/src/output_scene?.bmp
-*.sln
-*.vc*
-*.*sdf
-*resource.h
-*.ipch
-*.rc

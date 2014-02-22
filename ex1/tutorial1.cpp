@@ -76,7 +76,7 @@ Model _model;
 
 // camera params (again, a better practice is to have a camera singleton)
 vec3 dir = vec3(0.0f, 0.0f, 1.0f);
-vec3 pos = vec3(0.0f, 0.0f, -3.0f);
+vec3 pos = vec3(0.0f, 0.0f, -8.0f);
 vec3 up = vec3(0.0f, 1.0f, 0.0f);
 
 mat4 World = mat4(1.0);

@@ -49,8 +49,14 @@ private:
 	int _width, _height;
 
 	
+	struct face_indices_t
+	{
+		GLuint a,b,c;
+	};
 
-	void generateGrid();
+
+
+	void generateGrid(std::vector<face_indices_t> &triangles);
 
 public:
     Model();

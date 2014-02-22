@@ -20,9 +20,14 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #define SHADERS_DIR "shaders/"
-//
+
+
+#define DEBUG_PRINT(s, x) std::cout << s << ": " << x << std::endl;
+
+#define GRID_COORD(z, x) (z) * GRID_SIZE + (x)
+
 Model::Model() :
-    _vao(0), _vbo(0), _ibo(0)
+    _vao(0), _vbo(0), _ibo(0), _vertices(GRID_SIZE*GRID_SIZE)
 {
 
 }
@@ -34,24 +39,39 @@ Model::~Model()
     if (_ibo != 0) glDeleteBuffers(1, &_ibo);
 }
 
-void Model::generateGrid()
+
+void Model::generateGrid(std::vector<face_indices_t> &triangles)
 {
-	_nVertices = GRID_SIZE * GRID_SIZE;
-	for (int i = 0; i < GRID_SIZE; i++)
+	for (int i = 0; i < GRID_SIZE ; i++)
 	{
 		for(int j = 0; j < GRID_SIZE; j++)
 		{
-			_vertices[i * GRID_SIZE + j] = glm::vec4(j, 0.0, i, 1.0);
+			_vertices[GRID_COORD(i, j)] = glm::vec4(-j + GRID_SIZE / 2, -1.0, i - GRID_SIZE / 2, 1.0);
 		}
 	}
 
-	std::vector<glm::vec3> indices;
-	for (int i = 1; i < GRID_SIZE; i++)
+	int triCount = 0;
+	for (int i = 0; i < GRID_SIZE - 1; i++)
 	{
-		for(int j = 0; j < GRID_SIZE; j+=2)
+		for(int j = 0; j < GRID_SIZE - 1; j++)
 		{
-			indices[(i - 1) * GRID_SIZE + j] = glm::vec3(j, j + 1, i * GRID_SIZE);
-			indices[(i - 1) * GRID_SIZE + j] = glm::vec3(j, j + 1, i * GRID_SIZE + 1);
+			triangles[triCount].a = GRID_COORD(i, j);
+			triangles[triCount].b = GRID_COORD(i, j + 1);
+			triangles[triCount + 1].a = GRID_COORD(i + 1, j);
+			triangles[triCount + 1].b = GRID_COORD(i + 1, j + 1);
+			if((j % 2 == 0 && i % 2 == 0) || (j % 2 != 0 && i % 2 != 0))
+			{
+				triangles[triCount].c = GRID_COORD(i + 1, j + 1);
+				triangles[triCount + 1].c = GRID_COORD(i, j);
+			}
+			else
+			{
+				triangles[triCount].c = GRID_COORD(i + 1, j);
+				triangles[triCount + 1].c = GRID_COORD(i, j + 1);
+			}
+
+
+			triCount += 2;
 		}
 	}
 	
@@ -72,20 +92,12 @@ void Model::init()
 
     // Initialize vertices buffer and transfer it to OpenGL
     {
-        // positioning vertices
-        static const GLfloat vertices[] = {
-            0.0f,  -1.0f, 0.0f, 1.0f,
-            1.0f,  -1.0f, 0.0f, 1.0f,
-            0.0f,  -1.0f, 1.0f, 1.0f,
-            1.0f,  -1.0f, 1.0f, 1.0f,
-        };
-        
-        // connecting vertices into triangles
-        static const GLubyte indices[] = {
-            0,1,3,
-            0,2,3
-        };      	
-        _nVertices = 6;
+    	int numTriangles = (GRID_SIZE - 1) * (GRID_SIZE - 1) * 2;
+        _nVertices = numTriangles * 3;
+
+        std::vector<face_indices_t> triangles(numTriangles);
+        generateGrid(triangles);
+
 
         // Create and bind the object's Vertex Array Object:
         glGenVertexArrays(1, &_vao);
@@ -94,11 +106,11 @@ void Model::init()
         // Create and load vertex data into a Vertex Buffer Object:
         glGenBuffers(1, &_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * _vertices.size() , &(_vertices[0]), GL_STATIC_DRAW);
 
         glGenBuffers(1, &_ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face_indices_t) * numTriangles, &(triangles[0]), GL_STATIC_DRAW);
         
         // Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
         // Obtain attribute handles:
@@ -133,7 +145,7 @@ void Model::draw(mat4 wvp)
     glBindVertexArray(_vao);
 	
    
-    glDrawElements(GL_TRIANGLES, _nVertices, GL_UNSIGNED_BYTE, (GLvoid*)0);
+    glDrawElements(GL_TRIANGLES, _nVertices, GL_UNSIGNED_INT, (GLvoid*)0);
 
     // Unbind the Vertex Array object
     glBindVertexArray(0);

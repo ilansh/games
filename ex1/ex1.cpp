@@ -48,6 +48,7 @@ using namespace glm;
 #define KEY_BACKWORD		('s')
 #define KEY_RIGHT			('d')
 #define KEY_LEFT			('a')
+#define KEY_FAULT			('f')
 
 
 /** display callback */
@@ -233,6 +234,9 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case KEY_RIGHT:
 		move |= right;
+		break;
+	case KEY_FAULT:
+		_model.createFault();
 		break;
 	case KEY_QUIT:
 	case KEY_ESC:

@@ -40,6 +40,53 @@ Model::~Model()
 }
 
 
+int Model::randIntInRange(int range) const{
+	return ((float)rand() / RAND_MAX) * range;
+}
+
+
+//check if c is left of the line defined by a,b.
+//if p3 is above, return value is true
+bool Model::isLeft(vec2 a, vec2 b, vec2 c) const
+{
+	 return ((b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x)) > 0;
+}
+
+void Model::createFault()
+{
+//	int side1 = (int)randValInRange(4);
+//	int side2 = (int)randValInRange(4);
+//	while(side1 == side2)
+//	{
+//		side2 = (int)randValInRange(4);
+//	}
+//	int indexOnSide1 = (int)randValInRange(GRID_SIZE);
+//	int indexOnSide2 = (int)randValInRange(GRID_SIZE);
+
+	vec2 p1 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+	vec2 p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+	while(p1 == p2)
+	{
+		p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+	}
+//	for(int i = 0; i < GRID_SIZE; i++)
+//	{
+//		for(int j = 0; j < GRID_SIZE; j++)
+//		{
+//			if(isLeft(p1,p2,vec2(i,j)))
+//			{
+//				_vertices[GRID_COORD(i,j)].b++;
+//			}
+//			else
+//			{
+//				_vertices[GRID_COORD(i,j)].b--;
+//			}
+//		}
+//	}
+
+
+}
+
 void Model::generateGrid(std::vector<face_indices_t> &triangles)
 {
 	for (int i = 0; i < GRID_SIZE ; i++)

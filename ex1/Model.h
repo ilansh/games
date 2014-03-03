@@ -43,6 +43,8 @@ private:
 	//model vertices
 	std::vector<glm::vec4> _vertices;
 
+	//faults - each fault defined by two vertices
+	std::vector<glm::vec2> _faults;
 
     // View port frame:
     float _offsetX, _offsetY;
@@ -55,6 +57,8 @@ private:
 	};
 
 	void generateGrid(std::vector<face_indices_t> &triangles);
+    int randIntInRange(int range) const;
+    bool isLeft(vec2 a, vec2 b, vec2 c) const;
 
 public:
     Model();
@@ -62,6 +66,7 @@ public:
     void init();
     void draw(mat4 world, mat4 view, mat4 projection);
     void resize(int width, int height);	
+    void createFault();
 
 //    void moveForward();
 };

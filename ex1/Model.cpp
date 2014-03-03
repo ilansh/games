@@ -128,15 +128,15 @@ void Model::init()
     }
 }
 
-void Model::draw(mat4 wvp)
+void Model::draw(mat4 world, mat4 view, mat4 projection)
 {
     // Set the program to be used in subsequent lines:
     glUseProgram(programManager::sharedInstance().programWithID("default"));
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Also try using GL_FILL and GL_POINT
-  
+
     // pass the wvp to vertex shader
-    glUniformMatrix4fv (_gpuWVP, 1, GL_FALSE, value_ptr(wvp));
+    glUniformMatrix4fv (_gpuWVP, 1, GL_FALSE, value_ptr(projection * view * world));
     
     // pass the model color to fragment shader   
     glUniform4f(_fillColorUV, 0.3f, 0.5f, 0.3f, 1.0);
@@ -161,3 +161,9 @@ void Model::resize(int width, int height)
     _offsetX = 0;
     _offsetY = 0;
 }
+
+//void Model::moveForward()
+//{
+//	pos = pos + vec3(0,0,1);
+//	View = lookAt(pos, pos+dir, up);
+//}

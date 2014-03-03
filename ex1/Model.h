@@ -54,16 +54,16 @@ private:
 		GLuint a,b,c;
 	};
 
-
-
 	void generateGrid(std::vector<face_indices_t> &triangles);
 
 public:
     Model();
     virtual ~Model();
     void init();
-    void draw(mat4 wvp);
+    void draw(mat4 world, mat4 view, mat4 projection);
     void resize(int width, int height);	
+
+//    void moveForward();
 };
 
 #endif /* defined(__ex0__Model__) */

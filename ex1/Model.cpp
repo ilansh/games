@@ -22,7 +22,7 @@
 #define SHADERS_DIR "shaders/"
 
 
-#define DEBUG_PRINT(s, x) std::cout << s << ": " << x << std::endl;
+
 
 #define GRID_COORD(z, x) (z) * GRID_SIZE + (x)
 
@@ -54,39 +54,33 @@ bool Model::isLeft(vec2 a, vec2 b, vec2 c) const
 
 void Model::createFault()
 {
-//	int side1 = (int)randValInRange(4);
-//	int side2 = (int)randValInRange(4);
-//	while(side1 == side2)
-//	{
-//		side2 = (int)randValInRange(4);
-//	}
-//	int indexOnSide1 = (int)randValInRange(GRID_SIZE);
-//	int indexOnSide2 = (int)randValInRange(GRID_SIZE);
 	static float faultSize = 1;
-//	faultSize--;
-	vec2 p1 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
-	vec2 p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
-	while(p1 == p2)
+
+	for(int i = 0; i < FAULTS_PER_CALL; i++)
 	{
-		p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
-	}
-	for(int i = 0; i < GRID_SIZE; i++)
-	{
-		for(int j = 0; j < GRID_SIZE; j++)
+		vec2 p1 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+		vec2 p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+		while(p1 == p2)
 		{
-			if(isLeft(p1,p2,vec2(i,j)))
+			p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+		}
+		for(int i = 0; i < GRID_SIZE; i++)
+		{
+			for(int j = 0; j < GRID_SIZE; j++)
 			{
-				_vertices[GRID_COORD(i,j)].y += faultSize;
-			}
-			else
-			{
-				_vertices[GRID_COORD(i,j)].y -= faultSize;
+				if(isLeft(p1,p2,vec2(i,j)))
+				{
+					_vertices[GRID_COORD(i,j)].y += faultSize;
+				}
+				else
+				{
+					_vertices[GRID_COORD(i,j)].y -= faultSize;
+				}
 			}
 		}
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * _vertices.size() , &(_vertices[0]), GL_STATIC_DRAW);
-
 }
 
 void Model::generateGrid(std::vector<face_indices_t> &triangles)
@@ -95,7 +89,8 @@ void Model::generateGrid(std::vector<face_indices_t> &triangles)
 	{
 		for(int j = 0; j < GRID_SIZE; j++)
 		{
-			_vertices[GRID_COORD(i, j)] = glm::vec4(-j + GRID_SIZE / 2, 0.0, i - GRID_SIZE / 2, 1.0);
+//			_vertices[GRID_COORD(i, j)] = glm::vec4(-j + GRID_SIZE / 2, 0.0, i - GRID_SIZE / 2, 1.0);
+			_vertices[GRID_COORD(i, j)] = glm::vec4(j, 0.0, i, 1.0);
 		}
 	}
 
@@ -210,8 +205,53 @@ void Model::resize(int width, int height)
     _offsetY = 0;
 }
 
-//void Model::moveForward()
-//{
-//	pos = pos + vec3(0,0,1);
-//	View = lookAt(pos, pos+dir, up);
-//}
+float distanceXZ(vec3 a, vec3 b)
+{
+	return sqrt((a.x - b.x) * (a.x - b.x) + (a.z - b.z) * (a.z - b.z));
+}
+
+float Model::getPosHeight(vec3 pos)
+{
+	if(pos.x < 0.0 || pos.z < 0.0 || pos.x > GRID_SIZE - 1 || pos.z >  GRID_SIZE - 1)
+	{
+		return 0.0;
+	}
+
+//	vec3 lowerLeft = vec3(_vertices[GRID_COORD(floor(pos.z), floor(pos.x))]);
+//	vec3 upperRight = vec3(_vertices[GRID_COORD(ceil(pos.z), ceil(pos.x))]);
+//	vec3 lowerRight = vec3(_vertices[GRID_COORD(floor(pos.z), ceil(pos.x))]);
+//	vec3 upperLeft = vec3(_vertices[GRID_COORD(ceil(pos.z), floor(pos.x))]);
+
+	vec3 floorPoint = vec3(_vertices[GRID_COORD(floor(pos.z), floor(pos.x))]);
+//	float dist = (0 - 0) * (0 - 0) + (0 - 0) * (0 - 0) + (pos.z - closestPoint.z) * (pos.z - closestPoint.z);
+//	DEBUG_VECTOR("pos: ", pos);
+//	DEBUG_VECTOR("closestPoint: ", closestPoint);
+//	if(dotProd > EPSILON)
+//	{
+//		dist = sqrt(dotProd);
+//	}
+
+
+//	DEBUG_VECTOR("lower left:  ", lowerLeft);
+//	DEBUG_VECTOR("upper right: ",upperRight);
+
+//	float h1 = lowerLeft.y;
+//	float h2 = upperRight.y;
+//	float h3 = lowerRight.y;
+//	float h4 = upperLeft.y;
+//
+//	float dist1W = (M_SQRT2 - distanceXZ(pos, lowerLeft)) / M_SQRT2;
+//	float dist2W = (M_SQRT2 - distanceXZ(pos, upperRight)) / M_SQRT2;
+//	float dist3W = (M_SQRT2 - distanceXZ(pos, lowerRight)) / M_SQRT2;
+//	float dist4W = (M_SQRT2 - distanceXZ(pos, upperLeft)) / M_SQRT2;
+//
+//	float weight = distanceXZ(pos, floorPoint) / M_SQRT2;
+//	DEBUG_PRINT("weight: ",weight);
+//	float h = ;
+	return floorPoint.y;
+
+//	return (h1 + h2 + h3 + h4) / 4;
+
+//	DEBUG_PRINT("dist",dist);
+//	return closestPoint.y;
+}

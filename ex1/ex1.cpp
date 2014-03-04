@@ -50,8 +50,6 @@ using namespace glm;
 #define KEY_LEFT			('a')
 #define KEY_FAULT			('f')
 
-#define FAULTS_PER_KEY		10
-
 
 /** display callback */
 void display(void);
@@ -192,10 +190,11 @@ void windowResize(int w, int h)
 	glutPostRedisplay();
 }
 
-void moveCamera(const int dir)
+void terrainHorizontalMove()
 {
-	moveMask |= dir;
-//	if()
+	//get average height of four closest vertices to the camera
+	pos.y = _model.getPosHeight(pos);
+	View = lookAt(pos, pos + dir, up);
 }
 
 /********************************************************************
@@ -237,8 +236,8 @@ void keyboard(unsigned char key, int x, int y)
 		moveMask |= moveRight;
 		break;
 	case KEY_FAULT:
-		for(int i = 0; i < FAULTS_PER_KEY; i++)
-			_model.createFault();
+		_model.createFault();
+		terrainHorizontalMove();
 		glutPostRedisplay();
 		break;
 	case KEY_QUIT:
@@ -338,6 +337,10 @@ void passiveMotion(int x, int y)
 		angles.x += dx * mousespeed;
 		angles.y += dy * mousespeed;
 
+		//don't want too much vertical angle 1.5 ~ PI / 2
+		if(angles.y > 1.5) angles.y = 1.5;
+		if(angles.y < -1.5) angles.y = -1.5;
+
 		if(angles.x < -M_PI)
 			angles.x += M_PI * 2;
 		else if(angles.x > M_PI)
@@ -391,10 +394,13 @@ void idle() {
 		pos += forward_dir * movespeed * dt;
 	if(moveMask & moveBackward)
 		pos -= forward_dir * movespeed * dt;
-	if(moveMask & moveUp)
-		pos -= up * movespeed * dt;
-	if(moveMask & moveDown)
-		pos -= -up * movespeed * dt;
+
+	//terrain horizontal move depending on height of four closest vertices
+	if(moveMask)
+	{
+		pos.y = _model.getPosHeight(pos) + 1.0;
+	}
+
 
 	View = glm::lookAt(pos, pos + dir, up);
 

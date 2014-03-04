@@ -23,12 +23,20 @@ using namespace glm;
 
 #include <vector>
 
+#define EPSILON 0.01
+
+#define DEBUG_PRINT(s, x) std::cout << s << ": " << x << std::endl;
+
+#define DEBUG_VECTOR(s, v) std::cout << s << " x: "<< v.x << " y: " << v.y << " z: " << v.z << std::endl;
+
 class Model {
 	
 private:
 
 	//constants:
 	static const int GRID_SIZE = 128;
+
+	static const int FAULTS_PER_CALL = 10;
 
     GLuint _vao, _vbo, _ibo;
 
@@ -67,6 +75,7 @@ public:
     void draw(mat4 world, mat4 view, mat4 projection);
     void resize(int width, int height);	
     void createFault();
+    float getPosHeight(vec3);
 
 //    void moveForward();
 };

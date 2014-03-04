@@ -41,7 +41,7 @@ private:
     GLuint _vao, _vbo, _ibo;
 
     // Attribute handle:
-    GLint _posAttrib, _faultAttrib;
+    GLint _posAttrib;
 	
     // Uniform handle:
     GLint _fillColorUV, _gpuWVP;
@@ -49,11 +49,10 @@ private:
     size_t _nVertices;
 
 	//model vertices
-
-	std::vector<vec4> _vertices;
+	std::vector<glm::vec4> _vertices;
 
 	//faults - each fault defined by two vertices
-	std::vector<GLfloat> _faults;
+	std::vector<glm::vec2> _faults;
 
     // View port frame:
     float _offsetX, _offsetY;

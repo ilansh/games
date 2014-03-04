@@ -26,10 +26,8 @@
 
 #define GRID_COORD(z, x) (z) * GRID_SIZE + (x)
 
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
-
 Model::Model() :
-    _vao(0), _vbo(0), _ibo(0), _vertices(GRID_SIZE*GRID_SIZE), _faults(GRID_SIZE*GRID_SIZE)
+    _vao(0), _vbo(0), _ibo(0), _vertices(GRID_SIZE*GRID_SIZE)
 {
 
 }
@@ -143,25 +141,20 @@ void Model::init()
         std::vector<face_indices_t> triangles(numTriangles);
         generateGrid(triangles);
 
+
+        // Create and bind the object's Vertex Array Object:
+        glGenVertexArrays(1, &_vao);
+        glBindVertexArray(_vao);
 		
         // Create and load vertex data into a Vertex Buffer Object:
         glGenBuffers(1, &_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        //&(_vertices[0])
-        glBufferData(GL_ARRAY_BUFFER, (sizeof(vec4) + sizeof(GLfloat)) * _vertices.size() , NULL, GL_STATIC_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER, 0 , sizeof(vec4) * _vertices.size(), &(_vertices[0]));
-        glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4) * _vertices.size() , sizeof(GLfloat) * _faults.size(), &(_faults[0]));
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * _vertices.size() , &(_vertices[0]), GL_STATIC_DRAW);
 
         glGenBuffers(1, &_ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face_indices_t) * numTriangles, &(triangles[0]), GL_STATIC_DRAW);
         
-
-
-        // Create and bind the object's Vertex Array Object:
-        glGenVertexArrays(1, &_vao);
-        glBindVertexArray(_vao);
-
         // Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
         // Obtain attribute handles:
         _posAttrib = glGetAttribLocation(program, "position");
@@ -172,15 +165,6 @@ void Model::init()
                               GL_FALSE,
                               0,
                               0);
-
-        _faultAttrib = glGetAttribLocation(program, "faultVal");
-        glEnableVertexAttribArray(_faultAttrib);
-        glVertexAttribPointer(_faultAttrib, // attribute handle
-                              1,          // number of scalars per vertex
-                              GL_FLOAT,   // scalar type
-                              GL_FALSE,
-                              0,
-                              BUFFER_OFFSET(sizeof(vec4) * _vertices.size()));
 		
         // Unbind vertex array:
         glBindVertexArray(0);

@@ -62,28 +62,30 @@ void Model::createFault()
 //	}
 //	int indexOnSide1 = (int)randValInRange(GRID_SIZE);
 //	int indexOnSide2 = (int)randValInRange(GRID_SIZE);
-
+	static float faultSize = 1;
+//	faultSize--;
 	vec2 p1 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
 	vec2 p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
 	while(p1 == p2)
 	{
 		p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
 	}
-//	for(int i = 0; i < GRID_SIZE; i++)
-//	{
-//		for(int j = 0; j < GRID_SIZE; j++)
-//		{
-//			if(isLeft(p1,p2,vec2(i,j)))
-//			{
-//				_vertices[GRID_COORD(i,j)].b++;
-//			}
-//			else
-//			{
-//				_vertices[GRID_COORD(i,j)].b--;
-//			}
-//		}
-//	}
-
+	for(int i = 0; i < GRID_SIZE; i++)
+	{
+		for(int j = 0; j < GRID_SIZE; j++)
+		{
+			if(isLeft(p1,p2,vec2(i,j)))
+			{
+				_vertices[GRID_COORD(i,j)].y += faultSize;
+			}
+			else
+			{
+				_vertices[GRID_COORD(i,j)].y -= faultSize;
+			}
+		}
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * _vertices.size() , &(_vertices[0]), GL_STATIC_DRAW);
 
 }
 
@@ -93,7 +95,7 @@ void Model::generateGrid(std::vector<face_indices_t> &triangles)
 	{
 		for(int j = 0; j < GRID_SIZE; j++)
 		{
-			_vertices[GRID_COORD(i, j)] = glm::vec4(-j + GRID_SIZE / 2, -1.0, i - GRID_SIZE / 2, 1.0);
+			_vertices[GRID_COORD(i, j)] = glm::vec4(-j + GRID_SIZE / 2, 0.0, i - GRID_SIZE / 2, 1.0);
 		}
 	}
 
@@ -121,7 +123,6 @@ void Model::generateGrid(std::vector<face_indices_t> &triangles)
 			triCount += 2;
 		}
 	}
-	
 }
 
 void Model::init()

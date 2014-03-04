@@ -50,6 +50,8 @@ using namespace glm;
 #define KEY_LEFT			('a')
 #define KEY_FAULT			('f')
 
+#define FAULTS_PER_KEY		10
+
 
 /** display callback */
 void display(void);
@@ -90,7 +92,7 @@ Model _model;
 
 // camera params (again, a better practice is to have a camera singleton)
 vec3 dir = vec3(0.0f, 0.0f, 1.0f);
-vec3 pos = vec3(0.0f, 0.0f, -8.0f);
+vec3 pos = vec3(0.0f, 1.0f, 0.0f);
 vec3 up = vec3(0.0f, 1.0f, 0.0f);
 vec2 angles;
 
@@ -100,12 +102,14 @@ mat4 Projection = perspective(45.0f, 1.0f, 0.1f, 100.0f);
 
 mat4 wvp = Projection * View * World;
 
-const int left = 1;
-const int right = 2;
-const int forward = 4;
-const int backward = 8;
+const int moveLeft = 1;
+const int moveRight = 2;
+const int moveForward = 4;
+const int moveBackward = 8;
+const int moveUp = 16;
+const int moveDown = 32;
 
-int move = 0;
+int moveMask = 0;
 
 /** main function */
 int main(int argc, char* argv[])
@@ -188,11 +192,11 @@ void windowResize(int w, int h)
 	glutPostRedisplay();
 }
 
-//void moveCamera(vec3 offset)
-//{
-//	pos = pos + offset;
-//	View = glm::lookAt(pos, pos + dir, up);
-//}
+void moveCamera(const int dir)
+{
+	moveMask |= dir;
+//	if()
+}
 
 /********************************************************************
  * Function  :	keyboard
@@ -221,22 +225,21 @@ void keyboard(unsigned char key, int x, int y)
 		// For use in a future exercise
 		break;
 	case KEY_FORWARD:
-		move |= forward;
-		//		moveCamera(vec3(0, 0, MOVE_FACTOR));
+		moveMask |= moveForward;
 		break;
 	case KEY_BACKWORD:
-		move |= backward;
-		//		moveCamera(vec3(0, 0, -MOVE_FACTOR));
+		moveMask |= moveBackward;
 		break;
 	case KEY_LEFT:
-		move |= left;
-		//		moveCamera(vec3(MOVE_FACTOR, 0, 0));
+		moveMask |= moveLeft;
 		break;
 	case KEY_RIGHT:
-		move |= right;
+		moveMask |= moveRight;
 		break;
 	case KEY_FAULT:
-		_model.createFault();
+		for(int i = 0; i < FAULTS_PER_KEY; i++)
+			_model.createFault();
+		glutPostRedisplay();
 		break;
 	case KEY_QUIT:
 	case KEY_ESC:
@@ -298,13 +301,13 @@ void motion(int x, int y)
 
 void keyboardUp(unsigned char key, int x, int y) {
 	if(key == KEY_LEFT)
-		move &= ~left;
+		moveMask &= ~moveLeft;
 	if(key == KEY_RIGHT)
-		move &= ~right;
+		moveMask &= ~moveRight;
 	if(key == KEY_FORWARD)
-		move &= ~forward;
+		moveMask &= ~moveForward;
 	if(key == KEY_BACKWORD)
-		move &= ~backward;
+		moveMask &= ~moveBackward;
 }
 
 vec2 getScreenUnitCoordinates(vec2 pos)
@@ -380,19 +383,23 @@ void idle() {
 	vec3 right_dir = cross(forward_dir, up);
 
 	// Update camera position
-	if(move & left)
+	if(moveMask & moveLeft)
 		pos -= right_dir * movespeed * dt;
-	if(move & right)
+	if(moveMask & moveRight)
 		pos += right_dir * movespeed * dt;
-	if(move & forward)
+	if(moveMask & moveForward)
 		pos += forward_dir * movespeed * dt;
-	if(move & backward)
+	if(moveMask & moveBackward)
 		pos -= forward_dir * movespeed * dt;
+	if(moveMask & moveUp)
+		pos -= up * movespeed * dt;
+	if(moveMask & moveDown)
+		pos -= -up * movespeed * dt;
 
 	View = glm::lookAt(pos, pos + dir, up);
 
 	// Redraw the scene
-	if(move != 0)
+	if(moveMask != 0)
 	{
 		glutPostRedisplay();
 	}

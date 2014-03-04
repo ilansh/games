@@ -112,7 +112,7 @@ int moveMask = 0;
 /** main function */
 int main(int argc, char* argv[])
 {
-	std::cout << "Starting ex0..." << std::endl;
+	std::cout << "Starting ex1..." << std::endl;
 
 	// Initialize GLUT
 	glutInit(&argc, argv) ;
@@ -193,7 +193,7 @@ void windowResize(int w, int h)
 void terrainHorizontalMove()
 {
 	//get average height of four closest vertices to the camera
-	pos.y = _model.getPosHeight(pos);
+	pos.y = _model.getPosHeight(pos) + 1;
 	View = lookAt(pos, pos + dir, up);
 }
 
@@ -308,15 +308,6 @@ void keyboardUp(unsigned char key, int x, int y) {
 	if(key == KEY_BACKWORD)
 		moveMask &= ~moveBackward;
 }
-
-vec2 getScreenUnitCoordinates(vec2 pos)
-{
-	pos.x = 2 * (pos.x / WINDOW_SIZE) - 1.f;
-	pos.y = 2 * (pos.y / WINDOW_SIZE) - 1.f;
-	pos.y = -pos.y;
-	return pos;
-}
-
 
 
 void passiveMotion(int x, int y)

@@ -81,6 +81,8 @@ void Model::createFault()
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * _vertices.size() , &(_vertices[0]), GL_STATIC_DRAW);
+
+	faultSize /= 1.2;
 }
 
 void Model::generateGrid(std::vector<face_indices_t> &triangles)
@@ -89,7 +91,6 @@ void Model::generateGrid(std::vector<face_indices_t> &triangles)
 	{
 		for(int j = 0; j < GRID_SIZE; j++)
 		{
-//			_vertices[GRID_COORD(i, j)] = glm::vec4(-j + GRID_SIZE / 2, 0.0, i - GRID_SIZE / 2, 1.0);
 			_vertices[GRID_COORD(i, j)] = glm::vec4(j, 0.0, i, 1.0);
 		}
 	}
@@ -216,42 +217,6 @@ float Model::getPosHeight(vec3 pos)
 	{
 		return 0.0;
 	}
-
-//	vec3 lowerLeft = vec3(_vertices[GRID_COORD(floor(pos.z), floor(pos.x))]);
-//	vec3 upperRight = vec3(_vertices[GRID_COORD(ceil(pos.z), ceil(pos.x))]);
-//	vec3 lowerRight = vec3(_vertices[GRID_COORD(floor(pos.z), ceil(pos.x))]);
-//	vec3 upperLeft = vec3(_vertices[GRID_COORD(ceil(pos.z), floor(pos.x))]);
-
 	vec3 floorPoint = vec3(_vertices[GRID_COORD(floor(pos.z), floor(pos.x))]);
-//	float dist = (0 - 0) * (0 - 0) + (0 - 0) * (0 - 0) + (pos.z - closestPoint.z) * (pos.z - closestPoint.z);
-//	DEBUG_VECTOR("pos: ", pos);
-//	DEBUG_VECTOR("closestPoint: ", closestPoint);
-//	if(dotProd > EPSILON)
-//	{
-//		dist = sqrt(dotProd);
-//	}
-
-
-//	DEBUG_VECTOR("lower left:  ", lowerLeft);
-//	DEBUG_VECTOR("upper right: ",upperRight);
-
-//	float h1 = lowerLeft.y;
-//	float h2 = upperRight.y;
-//	float h3 = lowerRight.y;
-//	float h4 = upperLeft.y;
-//
-//	float dist1W = (M_SQRT2 - distanceXZ(pos, lowerLeft)) / M_SQRT2;
-//	float dist2W = (M_SQRT2 - distanceXZ(pos, upperRight)) / M_SQRT2;
-//	float dist3W = (M_SQRT2 - distanceXZ(pos, lowerRight)) / M_SQRT2;
-//	float dist4W = (M_SQRT2 - distanceXZ(pos, upperLeft)) / M_SQRT2;
-//
-//	float weight = distanceXZ(pos, floorPoint) / M_SQRT2;
-//	DEBUG_PRINT("weight: ",weight);
-//	float h = ;
 	return floorPoint.y;
-
-//	return (h1 + h2 + h3 + h4) / 4;
-
-//	DEBUG_PRINT("dist",dist);
-//	return closestPoint.y;
 }

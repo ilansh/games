@@ -14,8 +14,6 @@ EXEC = ex1
 LOGIN = ilansh
 ID = 302514401
 
-DBG = 1
-
 # list of all the sources files
 SRCS	= ex1.cpp		\
 		Model.cpp 	\

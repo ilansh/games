@@ -30,6 +30,7 @@ Thumbs.db
 [Dd]ebug*/
 *.lib
 *.sbr
+*.prefs
 obj/
 [Rr]elease*/
 _ReSharper*/

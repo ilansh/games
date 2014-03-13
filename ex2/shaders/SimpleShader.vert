@@ -7,5 +7,4 @@ uniform mat4 wvp;
 void main()
 {
    gl_Position = wvp*position;
-   //gl_Position = position;
 }

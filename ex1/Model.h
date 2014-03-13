@@ -51,9 +51,6 @@ private:
 	//model vertices
 	std::vector<glm::vec4> _vertices;
 
-	//faults - each fault defined by two vertices
-	std::vector<glm::vec2> _faults;
-
     // View port frame:
     float _offsetX, _offsetY;
 	int _width, _height;

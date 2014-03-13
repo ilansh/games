@@ -21,8 +21,11 @@
 
 #define SHADERS_DIR "shaders/"
 
+
+#define GRID_COORD(z, x) (z) * GRID_SIZE + (x)
+
 Model::Model() :
-    _vao(0), _vbo(0), _ibo(0)
+	_vao(0), _vbo(0), _ibo(0), _vertices(GRID_SIZE*GRID_SIZE)
 {
 
 }
@@ -33,6 +36,87 @@ Model::~Model()
     if (_vbo != 0) glDeleteBuffers(1, &_vbo);
     if (_ibo != 0) glDeleteBuffers(1, &_ibo);
 } 
+
+int Model::randIntInRange(int range) const{
+	return ((float)rand() / RAND_MAX) * range;
+}
+
+
+//check if c is left of the line defined by a,b.
+//if p3 is above, return value is true
+bool Model::isLeft(vec2 a, vec2 b, vec2 c) const
+{
+	 return ((b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x)) > 0;
+}
+
+void Model::createFault()
+{
+	static float faultSize = 1;
+
+	for(int i = 0; i < FAULTS_PER_CALL; i++)
+	{
+		vec2 p1 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+		vec2 p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+		while(p1 == p2)
+		{
+			p2 = vec2(randIntInRange(GRID_SIZE), randIntInRange(GRID_SIZE));
+		}
+		for(int i = 0; i < GRID_SIZE; i++)
+		{
+			for(int j = 0; j < GRID_SIZE; j++)
+			{
+				if(isLeft(p1,p2,vec2(i,j)))
+				{
+					_vertices[GRID_COORD(i,j)].y += faultSize;
+				}
+				else
+				{
+					_vertices[GRID_COORD(i,j)].y -= faultSize;
+				}
+			}
+		}
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * _vertices.size() , &(_vertices[0]), GL_STATIC_DRAW);
+
+	faultSize /= 1.2;
+}
+
+void Model::generateGrid(std::vector<face_indices_t> &triangles)
+{
+	for (int i = 0; i < GRID_SIZE ; i++)
+	{
+		for(int j = 0; j < GRID_SIZE; j++)
+		{
+			_vertices[GRID_COORD(i, j)] = glm::vec4(j, 0.0, i, 1.0);
+		}
+	}
+
+	int triCount = 0;
+	for (int i = 0; i < GRID_SIZE - 1; i++)
+	{
+		for(int j = 0; j < GRID_SIZE - 1; j++)
+		{
+			triangles[triCount].a = GRID_COORD(i, j);
+			triangles[triCount].b = GRID_COORD(i, j + 1);
+			triangles[triCount + 1].a = GRID_COORD(i + 1, j);
+			triangles[triCount + 1].b = GRID_COORD(i + 1, j + 1);
+			if((j % 2 == 0 && i % 2 == 0) || (j % 2 != 0 && i % 2 != 0))
+			{
+				triangles[triCount].c = GRID_COORD(i + 1, j + 1);
+				triangles[triCount + 1].c = GRID_COORD(i, j);
+			}
+			else
+			{
+				triangles[triCount].c = GRID_COORD(i + 1, j);
+				triangles[triCount + 1].c = GRID_COORD(i, j + 1);
+			}
+
+
+			triCount += 2;
+		}
+	}
+}
 
 void Model::init()
 {
@@ -49,20 +133,12 @@ void Model::init()
 
     // Initialize vertices buffer and transfer it to OpenGL
     {
-        // positioning vertices
-        static const GLfloat vertices[] = {
-            0.0f,  0.0f, 0.0f, 1.0f,
-            1.0f,  0.0f, 0.0f, 1.0f,
-            0.0f,  1.0f, 0.0f, 1.0f,
-            1.0f,  1.0f, 0.0f, 1.0f,
-        };
-        
-        // connecting vertices into triangles
-        static const GLubyte indices[] = {
-            0,1,3,
-            0,2,3
-        };      	
-        _nVertices = 6;
+    	int numTriangles = (GRID_SIZE - 1) * (GRID_SIZE - 1) * 2;
+        _nVertices = numTriangles * 3;
+
+        std::vector<face_indices_t> triangles(numTriangles);
+        generateGrid(triangles);
+
 
         // Create and bind the object's Vertex Array Object:
         glGenVertexArrays(1, &_vao);
@@ -71,11 +147,11 @@ void Model::init()
         // Create and load vertex data into a Vertex Buffer Object:
         glGenBuffers(1, &_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * _vertices.size() , &(_vertices[0]), GL_STATIC_DRAW);
 
         glGenBuffers(1, &_ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(face_indices_t) * numTriangles, &(triangles[0]), GL_STATIC_DRAW);
         
         // Tells OpenGL that there is vertex data in this buffer object and what form that vertex data takes:
         // Obtain attribute handles:
@@ -93,7 +169,7 @@ void Model::init()
     }
 }
 
-void Model::draw(mat4 wvp)
+void Model::draw(mat4 world, mat4 view, mat4 projection)
 {
     // Set the program to be used in subsequent lines:
     glUseProgram(programManager::sharedInstance().programWithID("default"));
@@ -101,7 +177,7 @@ void Model::draw(mat4 wvp)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Also try using GL_FILL and GL_POINT
   
     // pass the wvp to vertex shader
-    glUniformMatrix4fv (_gpuWVP, 1, GL_FALSE, value_ptr(wvp));
+    glUniformMatrix4fv (_gpuWVP, 1, GL_FALSE, value_ptr(projection * view * world));
     
     // pass the model color to fragment shader   
     glUniform4f(_fillColorUV, 0.3f, 0.9f, 0.3f, 1.0);
@@ -133,4 +209,14 @@ void Model::resize(int width, int height)
     _height = height;
     _offsetX = 0;
     _offsetY = 0;
+}
+
+float Model::getPosHeight(vec3 pos)
+{
+	if(pos.x < 0.0 || pos.z < 0.0 || pos.x > GRID_SIZE - 1 || pos.z >  GRID_SIZE - 1)
+	{
+		return 0.0;
+	}
+	vec3 floorPoint = vec3(_vertices[GRID_COORD(floor(pos.z), floor(pos.x))]);
+	return floorPoint.y;
 }
